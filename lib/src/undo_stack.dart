@@ -16,6 +16,20 @@ class ChangeStack {
   /// Can undo the previous change
   bool get canUndo => _history.isNotEmpty;
 
+  ///Will return the last change
+  List<Change>? get current {
+    try {
+      //This can throw an error, if theres no last element
+      _history.last;
+    } catch (e) {
+      //Thats why we should return null in that case
+      return null;
+    }
+  }
+
+  ///Get Change List length
+  int get length => _history.length;
+
   /// Add New Change and Clear Redo Stack
   void add<T>(Change<T> change) {
     change.execute();
@@ -67,7 +81,9 @@ class ChangeStack {
   void undo() {
     if (canUndo) {
       final changes = _history.removeLast();
-      for (final change in changes) {
+      //Changes need to be reversed,
+      //because you should start from the last item (i.e. the biggest index) in a group-change
+      for (final change in changes.reversed) {
         change.undo();
       }
       _redos.addFirst(changes);
@@ -79,16 +95,19 @@ class Change<T> {
   Change(
     this._oldValue,
     this._execute(),
-    this._undo(T oldValue), {
+    this._undo(dynamic oldValue), {
+    this.id,
     this.description = '',
   });
+
+  final Object? id;
 
   final String description;
 
   final void Function() _execute;
-  final T _oldValue;
+  final dynamic _oldValue;
 
-  final void Function(T oldValue) _undo;
+  final void Function(dynamic oldValue) _undo;
 
   void execute() {
     _execute();
@@ -96,5 +115,15 @@ class Change<T> {
 
   void undo() {
     _undo(_oldValue);
+  }
+
+  Change copyWith({dynamic id, String? description}) {
+    return Change(
+      this._oldValue,
+      this._execute,
+      this._undo,
+      id: id,
+      description: description ?? '',
+    );
   }
 }

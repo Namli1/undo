@@ -12,7 +12,7 @@ class SimpleStack<T> extends ChangeStack {
     }
   }
 
- late T _state;
+  late T _state;
 
   /// Current state
   T get state => _state;
@@ -23,13 +23,13 @@ class SimpleStack<T> extends ChangeStack {
 
   void modify(T val) {
     add(Change<T>(
-        _state,
-        () => _newValue(val),
-        _newValue,
-      ));
+      _state,
+      () => _newValue(val),
+      _newValue,
+    ));
   }
 
-  void _newValue(T val) {
+  void _newValue(dynamic val) {
     _state = val;
 
     if (onUpdate != null) {
